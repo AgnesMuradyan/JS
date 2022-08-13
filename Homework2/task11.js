@@ -5,7 +5,12 @@
  */
 
 function merge(a1, a2) {
-    return new Set(a1.concat(a2.filter((item) => !a1.includes(item))));
+   const result = []
+    for (let i = 0, j =0; i < a1.length, j < a2.length; i++, j++) {
+        if (result.indexOf(a1[i]) === -1) result.push(a1[i]);
+        if (result.indexOf(a2[j]) === -1) result.push(a2[j]);
+    }
+    return result;
 }
 
 a1 = [15, 1,2,3,4,5,6,7];
