@@ -10,7 +10,7 @@ function arrayClone(obj) {
     for (let elem in obj) {
         let value = obj[elem];
         if(typeof value === "object" && value) {
-            result[elem] = deepCopy(value);
+            result[elem] = arrayClone(value);
         } else {
             result[elem] = value;
         }
