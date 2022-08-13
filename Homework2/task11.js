@@ -5,7 +5,7 @@
  */
 
 function merge(a1, a2) {
-    return a1.concat(a2.filter((item) => !a1.includes(item)));
+    return new Set(a1.concat(a2.filter((item) => !a1.includes(item))));
 }
 
 a1 = [15, 1,2,3,4,5,6,7];
