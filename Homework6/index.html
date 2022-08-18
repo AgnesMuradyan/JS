@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+
+        table {
+            border-spacing: 1px;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        * {
+            position:relative }
+
+        td,th {
+            padding-left:8px}
+
+        thead tr {
+            height:60px;
+            background:#FFED86;
+            font-size:16px;
+        }
+
+        body {
+            background:#9BC86A;
+            font:400 14px 'Calibri','Arial';
+            padding:20px;
+        }
+
+        blockquote {
+            color:white;
+            text-align:center;
+        }
+
+
+
+    </style>
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <table id="result">
+        <thead>
+        <tr>
+            <th>Last Name</th>
+            <th>Salary</th>
+            <th>Birth Date</th>
+            <th>Employment Date</th>
+            <th>Experience</th>
+            <th>Experience In Days</th>
+            <th>Age</th>
+            <th>Days Until Retirement</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+<script>
+
+    function Employee(lastName, salary, birthDay, employmentDate){
+        this.lastName = lastName;
+        this.salary = salary;
+        this.birthDay = new Date(birthDay);
+        this.employmentDate = new Date(employmentDate);
+
+
+        this[Symbol.toPrimitive] = function(hint) {
+            if (hint === "number")
+                return this.salary;
+            if (hint === "string")
+                return this.lastName;
+            return "BirthDay " + this.birthDay.toString() + " employment Date " + this.employmentDate.toString();
+        };
+    }
+
+    Employee.prototype.getExperience = function () {
+
+        let curr = new Date(this.employmentDate);
+        let years = new Date().getFullYear() - curr.getFullYear();
+        curr.setFullYear(curr.getFullYear() + years);
+        if (curr > new Date())
+            years--;
+        let months = new Date().getMonth() - curr.getMonth();
+        curr.setMonth(curr.getMonth() + months);
+        if (curr > new Date())
+            months--;
+        if (months < 0)
+            months += 12;
+        let allMonths = [31, (this.employmentDate.getFullYear() % 4 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        let days = new Date().getDate() - curr.getDate();
+        if(days < 0){
+            days += allMonths[this.employmentDate.getMonth()];
+        }
+
+        return `Experience:  ${years} years, ${months} months, ${days} days`;
+    };
+
+    Employee.prototype.getExperienceInDays = function () {
+        return "Experience in days:  " + Math.floor((new Date() - this.employmentDate) / (1000 * 60 * 60 * 24));
+    };
+
+    Employee.prototype.getExperienceInMonths = function (){
+        return new Date().getMonth() - this.employmentDate.getMonth()
+            + 12 * (new Date().getFullYear() - this.employmentDate.getFullYear())
+    }
+
+    Employee.prototype.getAge = function () {
+        let curr = new Date(this.birthDay);
+        let years = new Date().getFullYear() - curr.getFullYear();
+        curr.setFullYear(curr.getFullYear() + years);
+        if (curr > new Date())
+            years--;
+        return `${years} years old`;
+    };
+
+    Employee.prototype.getDaysUntilRetirement = function () {
+        let retirementDate = new Date(this.birthDay.valueOf());
+        retirementDate.setFullYear(this.birthDay.getFullYear() + 65);
+        let curr = Math.floor((retirementDate - new Date())/ (1000 * 60 * 60 * 24));
+        return `${curr} days until retirement`;
+    };
+
+
+
+
+    function monthsCount(data) {
+        let years = new Date().getFullYear() - data.getFullYear();
+        let months = new Date().getMonth() - data.getMonth();
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        months+=12*years;
+        return months;
+    }
+
+    function Production (name, monthlyProfit, monthlySpendings) {
+        this.name = name;
+        this.salarySum = 0;
+        this.monthlyProfit = monthlyProfit;
+        this.monthlySpendings = monthlySpendings;
+        this.employees = [];
+
+        this[Symbol.toPrimitive] = function(hint) {
+            if (hint === "number")
+                return this.monthlyProfit;
+            if (hint === "string")
+                return this.name;
+            return this.employees.toString();
+        };
+    }
+
+    Production.prototype.addEmployee = function (employee) {
+        this.employees.push(employee);
+        this.salarySum += employee.salary * employee.getExperienceInMonths();
+        this.monthlyProfit -= employee.salary * 0.5;
+        this.monthlySpendings += employee.salary;
+
+    };
+
+    Production.prototype.deleteEmployee = function (emp) {
+        let curr = this.employees.indexOf(employee);
+        if (curr !== -1) {
+            this.employees.splice(curr, 1);
+            this.salarySum -= employee.salary * employee.getExperienceInMonths();
+            this.monthlySpendings -= employee.salary;
+            this.monthlyProfit += employee.salary * 0.5;
+        }
+        else
+            return "There is no such employee";
+    };
+
+    Production.prototype.getAvgSalary = function () {
+        let avg = 0;
+        for (let employee of this.employees) {
+            avg += employee.salary;
+        }
+        return avg / this.employees.length;
+    };
+
+
+    const table = document.getElementById("result")
+    console.log(table);
+    console.dir(table);
+
+    function createCell(x){
+        const newCell = document.createElement("td");
+        newCell.textContent = x;
+        return newCell;
+    }
+
+    function createRow(obj){
+        const newRow = document.createElement("tr");
+        for(let p in obj){
+            if(typeof obj[p] !== 'function')
+                newRow.append(createCell(obj[p]));
+        }
+
+        newRow.append(createCell(obj.getExperience()));
+        newRow.append(createCell(obj.getExperienceInDays()));
+        newRow.append(createCell(obj.getAge()));
+        newRow.append(createCell(obj.getDaysUntilRetirement()));
+        return newRow;
+    }
+
+    let production = new Production("lalla", 0, 1234567890, 56780);
+    alert("Input Employees, when you input X, the process will stop")
+    while (true) {
+        let name = prompt("Please Enter Name:  ");
+        if (name === 'X')
+            break;
+        let salary = prompt("Please Enter Salary:  ");
+        if (salary === 'X')
+            break;
+        let birthday = prompt("Please Enter Birth date:  ");
+        if (birthday === 'X')
+            break;
+        let employmentDate = prompt("Please Enter Employment Date:  ");
+        if (employmentDate === 'X')
+            break;
+        let emp = new Employee(name, salary, birthday, employmentDate);
+
+
+        table.append(createRow(emp));
+        production.addEmployee(emp);
+    }
+
+
+</script>
+</body>
+</html>
